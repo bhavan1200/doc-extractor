@@ -1,0 +1,151 @@
+name: Spec Hygiene
+
+on:
+  # schedule:
+    # Run weekly on Mondays at 9 AM UTC
+  #  - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detect-unarchived:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Scan for unarchived completed specs
+        id: scan
+        run: |
+          set -e
+          
+          # Find all tasks.md files in specs/
+          unarchived_specs=()
+          
+          for tasks_file in specs/*/tasks.md; do
+            # Skip if no tasks.md files found
+            [ -e "$tasks_file" ] || continue
+            
+            spec_dir=$(dirname "$tasks_file")
+            spec_name=$(basename "$spec_dir")
+            
+            # Skip if already archived
+            if [ -d "specs/archive/$spec_name" ]; then
+              continue
+            fi
+            
+            # Check if all tasks are [X] or [x]
+            incomplete_count=$(grep -ci "^\s*- \[ \]" "$tasks_file" || true)
+            if [ "$incomplete_count" -eq 0 ]; then
+              # Verify there's at least one completed task
+              completed_count=$(grep -ciE "^\s*- \[[xX]\]" "$tasks_file" || true)
+              if [ "$completed_count" -gt 0 ]; then
+                unarchived_specs+=("$spec_name")
+              fi
+            fi
+          done
+          
+          # Set outputs
+          if [ ${#unarchived_specs[@]} -eq 0 ]; then
+            echo "has_unarchived=false" >> $GITHUB_OUTPUT
+            echo "No unarchived completed specs found."
+          else
+            echo "has_unarchived=true" >> $GITHUB_OUTPUT
+            echo "spec_list<<EOF" >> $GITHUB_OUTPUT
+            printf '%s\n' "${unarchived_specs[@]}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            echo "Found ${#unarchived_specs[@]} unarchived completed spec(s):"
+            for spec in "${unarchived_specs[@]}"; do
+              echo "  - $spec"
+            done
+          fi
+      
+      - name: Create or update GitHub Issue
+        if: steps.scan.outputs.has_unarchived == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          
+          # Build issue body
+          issue_body="The following specs have all tasks marked \`[X]\` but are not in \`specs/archive/\`:"
+          issue_body+=$'\n\n'
+          
+          # Read spec list from previous step output
+          while IFS= read -r spec; do
+            issue_body+="- \`$spec\`"
+            issue_body+=$'\n'
+          done <<< "${{ steps.scan.outputs.spec_list }}"
+          
+          issue_body+=$'\n'
+          issue_body+="To archive: open Copilot Chat, select the **Spec Closer** agent from the agent picker dropdown, and say \"close spec <spec-number>\"."
+          
+          # Check if issue already exists
+          issue_number=$(gh issue list \
+            --search "Unarchived completed specs in:title" \
+            --state open \
+            --json number \
+            --jq '.[0].number' || echo "")
+          
+          if [ -z "$issue_number" ]; then
+            # Create new issue
+            gh issue create \
+              --title "Unarchived completed specs" \
+              --body "$issue_body" \
+              --label "spec-hygiene"
+            echo "Created new issue"
+          else
+            # Update existing issue
+            gh issue edit "$issue_number" --body "$issue_body"
+            echo "Updated issue #$issue_number"
+          fi
+      
+      - name: Close issue if no unarchived specs
+        if: steps.scan.outputs.has_unarchived == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          
+          # Check if issue exists and is open
+          issue_number=$(gh issue list \
+            --search "Unarchived completed specs in:title" \
+            --state open \
+            --json number \
+            --jq '.[0].number' || echo "")
+          
+          if [ -n "$issue_number" ]; then
+            gh issue close "$issue_number" \
+              --comment "All previously detected unarchived specs have been archived."
+            echo "Closed issue #$issue_number"
+          else
+            echo "No open issue found — nothing to close"
+          fi
+      
+      - name: Post job summary
+        if: always()
+        run: |
+          set -e
+          
+          if [ "${{ steps.scan.outputs.has_unarchived }}" == "true" ]; then
+            echo "## Unarchived Completed Specs" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following specs are complete but not archived:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            while IFS= read -r spec; do
+              echo "- \`$spec\`" >> $GITHUB_STEP_SUMMARY
+            done <<< "${{ steps.scan.outputs.spec_list }}"
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To archive: open Copilot Chat, select the **Spec Closer** agent from the agent picker dropdown, and say \"close spec <spec-number>\"." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## No Unarchived Completed Specs" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No unarchived completed specs found." >> $GITHUB_STEP_SUMMARY
+          fi

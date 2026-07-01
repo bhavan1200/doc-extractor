@@ -1,0 +1,72 @@
+# Implementation Plan: {{featureName}}
+
+**Feature ID**: {{featureId}}
+**Status**: Draft
+**Created**: {{date}}
+
+---
+
+## Architecture Overview
+
+{{architectureOverview}}
+
+---
+
+## Tech Stack
+
+{{#each techStack}}
+### {{this.category}}
+- **Choice**: {{this.choice}}
+- **Version**: {{this.version}}
+- **Rationale**: {{this.rationale}}
+{{/each}}
+
+---
+
+## File Structure
+
+```
+{{fileStructure}}
+```
+
+---
+
+## Component Design
+
+{{#each components}}
+### {{this.name}}
+
+**Responsibility**: {{this.responsibility}}
+
+**Interface**:
+```typescript
+{{this.interface}}
+```
+
+**Dependencies**: {{join this.dependencies ", "}}
+
+{{/each}}
+
+---
+
+## Implementation Phases
+
+{{#each phases}}
+### Phase {{this.number}}: {{this.name}}
+
+**Goal**: {{this.goal}}
+
+**Tasks**:
+{{#each this.tasks}}
+- [ ] {{this}}
+{{/each}}
+
+{{/each}}
+
+---
+
+## ADR Notes
+
+{{#each adrNotes}}
+- **{{this.adrId}}**: {{this.constraint}}
+{{/each}}

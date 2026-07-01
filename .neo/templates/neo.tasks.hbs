@@ -1,0 +1,35 @@
+# Task Breakdown: {{featureName}}
+
+**Feature ID**: {{featureId}}
+**Status**: Draft
+**Created**: {{date}}
+**Total Tasks**: {{totalTasks}}
+
+---
+
+## Instructions
+
+- Mark tasks complete with `[X]` as you finish them
+- `[P]` tasks within the same phase can execute in parallel
+- Sequential tasks must complete before the next phase begins
+
+---
+
+{{#each phases}}
+## Phase {{this.number}}: {{this.name}}
+
+{{#each this.tasks}}
+- [ ] **{{this.id}}** {{#if this.parallel}}[P]{{/if}} {{#if this.story}}[{{this.story}}]{{/if}} — {{this.description}}
+  - Files: `{{join this.files "`, `"}}`
+{{#if this.depends}}  - Depends: {{this.depends}}
+{{/if}}{{/each}}
+
+{{/each}}
+
+---
+
+## Commit Plan
+
+{{#each commits}}
+{{this.number}}. `{{this.message}}` — after {{this.after}}
+{{/each}}

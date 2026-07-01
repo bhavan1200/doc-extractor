@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# Operations Command Center
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## DIP
 
-## Available Scripts
+A comprehensive React-based operational dashboard for monitoring and managing AI-driven document and work processing across three core use cases at SEI Investment Manager Services.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📋 Overview
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The **Operations Command Center** is a unified dashboard that provides real-time visibility into SEI IMS's AI transformation initiatives. It consolidates three high-priority use cases:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+| Use Case | ID | Description |
+|----------|-----|-------------|
+| **Email Triage & Response** | UC-10 | AI-driven email classification, routing, and JIRA integration for Investor Services |
+| **Document Data Extraction** | UC-11 | Intelligent KYC and onboarding document extraction with human-in-the-loop validation |
+| **Fee Calculation Automation** | UC-19 | Automated fee engine for management fees, carried interest, and incentive fees |
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🏗️ Architecture
 
-### `npm run build`
+### Frontend Stack
+- **React 18** - UI framework
+- **Recharts** - Data visualization and charts
+- **CSS Variables** - Theming and dark/light mode support
+- **Mock API Layer** - Simulated backend with realistic async behavior
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+ps-command-center/
+├── src/
+│ ├── App.js # Main application entry
+│ ├── index.js # React DOM render
+│ ├── index.css # Global styles & design system
+│ ├── component/
+│ │ ├── Header.jsx # Top navigation bar
+│ │ ├── Sidebar.jsx # Sidebar navigation with UC badges
+│ │ ├── Overview.jsx # Dashboard overview with KPI cards
+│ │ ├── UC10.jsx # Email Triage queue + pipeline drawer
+│ │ ├── UC11.jsx # Document Extraction queue + field details
+│ │ ├── UC19.jsx # Fee Automation + waterfall calculations
+│ │ └── index.jsx # Shared UI components library
+│ ├── mockData/
+│ │ ├── index.js # Mock API with simulated delay
+│ │ └── mockData.js # Dummy data for all three use cases
+│ └── assets/
+│ └── logo.svg # Application logo
+├── public/
+│ └── index.html # HTML template
+├── package.json # Dependencies and scripts
+└── README.md
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🚀 Getting Started
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Prerequisites
+- Node.js 16.x or higher
+- npm 7.x or higher
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Installation
 
-## Learn More
+```bash
+# Clone the repository
+git clone <repository-url>
+cd ops-command-center
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Install dependencies
+npm install
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Install recharts for charts
+npm install recharts
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Start development server
+npm start

@@ -1,0 +1,44 @@
+# ADR-{{number}}: {{title}}
+
+## Status
+
+**{{status}}**{{#if supersedes}} — Supersedes [ADR-{{supersedes}}]({{supersedes}}-{{supersededSlug}}.md){{/if}}
+
+## Context
+
+{{context}}
+
+## Decision
+
+{{decision}}
+
+## Consequences
+
+### Positive
+{{#each positiveConsequences}}
+- **{{this.id}}**: {{this.description}}
+{{/each}}
+
+### Negative
+{{#each negativeConsequences}}
+- **{{this.id}}**: {{this.description}}
+{{/each}}
+
+## Alternatives Considered
+
+{{#each alternatives}}
+### {{this.name}}
+- **ALT-{{this.id}}**: **Description**: {{this.description}}
+- **Rejection Reason**: {{this.reason}}
+
+{{/each}}
+
+## Implementation Notes
+{{#each implementationNotes}}
+- **IMP-{{this.id}}**: {{this.note}}
+{{/each}}
+
+## References
+{{#each references}}
+- **REF-{{this.id}}**: {{this.text}}
+{{/each}}

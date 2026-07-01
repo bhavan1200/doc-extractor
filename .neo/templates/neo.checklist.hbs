@@ -1,0 +1,26 @@
+# {{domain}} Checklist
+
+**Feature**: {{featureName}}
+**Domain**: {{domain}}
+**Created**: {{date}}
+
+> **Purpose**: Requirements quality checklist — verifies that your spec/plan text is clear, complete, and unambiguous.
+> Mark items `[X]` when the requirement is confirmed to be present and well-defined.
+
+---
+
+{{#each groups}}
+## {{this.name}}
+
+{{#each this.items}}
+- [ ] {{this}}
+{{/each}}
+
+{{/each}}
+
+---
+
+## Sign-off
+
+- [ ] All CRITICAL requirements have been validated
+- [ ] Author has reviewed all incomplete items

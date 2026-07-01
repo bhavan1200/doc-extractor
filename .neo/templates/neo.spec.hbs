@@ -1,0 +1,61 @@
+# Feature Specification: {{featureName}}
+
+**Feature ID**: {{featureId}}
+**Status**: Draft
+**Created**: {{date}}
+
+---
+
+## Overview
+
+{{overview}}
+
+---
+
+## User Stories
+
+{{#each userStories}}
+- **{{this.id}}**: As a {{this.persona}}, I want to {{this.action}} so that {{this.benefit}}
+{{/each}}
+
+---
+
+## Functional Requirements
+
+{{#each functionalRequirements}}
+### {{this.id}}: {{this.title}}
+
+{{this.description}}
+
+**Acceptance Criteria**:
+{{#each this.criteria}}
+- [ ] {{this}}
+{{/each}}
+
+{{/each}}
+
+---
+
+## Non-Functional Requirements
+
+{{#each nonFunctionalRequirements}}
+### {{this.category}}
+
+- {{this.requirement}}
+{{/each}}
+
+---
+
+## Edge Cases
+
+{{#each edgeCases}}
+- **{{this.id}}**: {{this.description}} → Expected: {{this.expected}}
+{{/each}}
+
+---
+
+## Out of Scope
+
+{{#each outOfScope}}
+- {{this}}
+{{/each}}

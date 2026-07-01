@@ -1,0 +1,79 @@
+# Feature Brief: {{featureName}}
+
+**Feature ID**: {{featureId}}
+**PRD Domain**: {{prdDomain}}
+**Status**: Draft
+**Created**: {{date}}
+
+---
+
+## Summary
+
+{{summary}}
+
+---
+
+## Goals
+
+{{#each goals}}
+- {{this}}
+{{/each}}
+
+---
+
+## User Stories (Prioritized)
+
+{{#each userStories}}
+- **[{{this.priority}}]** As a {{this.persona}}, I want to {{this.action}} so that {{this.benefit}}
+{{/each}}
+
+---
+
+## Acceptance Criteria
+
+{{#each acceptanceCriteria}}
+### {{this.storyRef}}
+
+{{#each this.criteria}}
+- [ ] Given {{this.given}}, when {{this.when}}, then {{this.then}}
+{{/each}}
+
+{{/each}}
+
+---
+
+## Scope
+
+### In Scope
+{{#each inScope}}
+- {{this}}
+{{/each}}
+
+### Out of Scope
+{{#each outOfScope}}
+- {{this}}
+{{/each}}
+
+---
+
+## Key Decisions Required
+
+{{#each openQuestions}}
+- **Q{{this.id}}**: {{this.question}}
+{{/each}}
+
+---
+
+## Dependencies
+
+{{#each dependencies}}
+- {{this}}
+{{/each}}
+
+---
+
+## Success Metrics
+
+{{#each successMetrics}}
+- {{this}}
+{{/each}}
