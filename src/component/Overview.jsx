@@ -6,6 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 
 function UcCard({ ucId, label, color, icon, stats, sla, onClick }) {
   const [hov, setHov] = useState(false);
+
+
   return (
     <div onClick={onClick}
       onMouseEnter={() => setHov(true)}
@@ -92,14 +94,15 @@ function DocStatusChart() {
   );
 }
 
-export default function Overview({ setTab }) {
+export default function Overview({ setTab, dateRange }) {
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
 
   useEffect(() => {
     dashboardApi.getStats().then(setStats);
     dashboardApi.getRecentActivity(7).then(setActivity);
-  }, []);
+  }, [dateRange]); // Re-fetch when date range changes
+
 
   if (!stats) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -143,8 +146,16 @@ export default function Overview({ setTab }) {
     },
   ];
 
+  const dateRangeDisplay = dateRange?.start && dateRange?.end 
+    ? `${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()}`
+    : 'Last 7 Days';
+
   return (
     <div className="fade-in" style={{ height: '100%', overflowY: 'auto', padding: 20 }}>
+
+      <div style={{ fontSize: 10, color: 'var(--text3)', marginBottom: 16 }}>
+        Showing data for: <strong>{dateRangeDisplay}</strong>
+      </div>
 
       {/* UC Cards */}
       <div style={{ marginBottom: 18 }}>
