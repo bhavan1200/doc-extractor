@@ -29,6 +29,7 @@ function App() {
         return <Overview setTab={setTab} dateRange={dateRange} />;
       case 'uc10':
         return <UC10 dateRange={dateRange} />;
+      case 'uc10updated':
       case 'uc11':
         return <UC11 dateRange={dateRange} />;
       case 'uc19':
