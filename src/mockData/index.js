@@ -1,4 +1,4 @@
-import { EMAILS, DOCUMENTS, FEE_CALCS, DASHBOARD } from './mockData';
+import { EMAILS, DOCUMENTS, FEE_CALCS, DASHBOARD, PORTFOLIO } from './mockData';
 
 const delay = (ms = 400) => new Promise(r => setTimeout(r, ms));
 
@@ -123,5 +123,10 @@ export const dashboardApi = {
   async getRecentActivity(limit = 8) {
     await delay(200);
     return EMAILS.slice(0, limit);
+  },
+
+  async getPortfolio() {
+    await delay(150);
+    return PORTFOLIO;
   },
 };

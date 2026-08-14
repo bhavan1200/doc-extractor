@@ -110,40 +110,56 @@ export const EMAILS = Array.from({ length: 52 }, (_, i) => {
   };
 });
 
-// ─── DOCUMENTS ───────────────────────────────────────────────────────────────
+// ─── DOCUMENTS (UC-11) ───────────────────────────────────────────────────────
+// SOW-accurate: doc types are Sub Docs, SIF Docs, Tax Docs (W-8/W-9 family)
+// Sources: Email, FTP, Kiteworks (shared repos)
+// Onboarding types: Initial (90 min baseline) and Additional (9 min baseline)
 
 export const DOC_TYPES = [
-  'Subscription Document', 'KYC Form', 'Tax Document (W-8BEN)',
-  'Wire Instruction', 'Investor Agreement', 'FATCA Form',
-  'AML Questionnaire', 'Accredited Investor Cert',
+  'Subscription Document',
+  'SIF Document',
+  'Tax Form – W-8BEN',
+  'Tax Form – W-8BEN-E',
+  'Tax Form – W-9',
+  'Tax Form – W-8ECI',
+  'Tax Form – W-8IMY',
+  'CRS Self-Certification',
 ];
+
+// Initial Onboarding = full packet (Sub Doc + SIF + Tax) — 90 min baseline
+// Additional Onboarding = incremental update — 9 min baseline
+export const ONBOARDING_TYPES = ['Initial Onboarding', 'Additional Onboarding'];
 
 export const DOC_STATUSES = [
   'Processing', 'Extracted', 'Under Review', 'Validated', 'Failed',
 ];
 
+// SOW Schedule 1 — input channels
 export const DOC_SOURCES = [
-  'Email Attachment', 'FTP Upload', 'Portal Submission', 'Secure Email',
+  'Email Attachment', 'FTP Upload', 'Kiteworks', 'Shared Repository',
 ];
 
+// Fields actually extracted during subscription onboarding
 const BASE_FIELDS = [
-  { name: 'Legal Entity Name',      value: 'Alpha Capital Partners LLC',      baseConf: 96 },
-  { name: 'Tax ID (EIN)',            value: '84-2934871',                       baseConf: 92 },
-  { name: 'Entity Type',             value: 'Limited Liability Company',        baseConf: 88 },
-  { name: 'Jurisdiction',            value: 'Delaware, United States',          baseConf: 94 },
-  { name: 'Commitment Amount',       value: '$5,000,000',                       baseConf: 85 },
-  { name: 'Contact Name',            value: 'James Whitfield',                  baseConf: 91 },
-  { name: 'Contact Email',           value: 'j.whitfield@alphacapital.com',     baseConf: 97 },
-  { name: 'Authorized Signatory',    value: 'James Whitfield, Managing Director',baseConf: 79 },
-  { name: 'Date of Incorporation',   value: 'March 15, 2018',                   baseConf: 88 },
-  { name: 'Beneficial Owner >25%',   value: '[FLAGGED – Requires Manual Review]',baseConf: 71 },
-  { name: 'Bank Account Number',     value: 'XXXX-XXXX-4821',                   baseConf: 93 },
-  { name: 'ABA Routing Number',      value: '021000021',                        baseConf: 95 },
+  { name: 'Legal Entity Name',        value: 'Crestwood LP',                      baseConf: 96 },
+  { name: 'Entity Type',              value: 'Limited Partnership',                baseConf: 92 },
+  { name: 'Tax ID / EIN',             value: '47-3821904',                         baseConf: 91 },
+  { name: 'Jurisdiction',             value: 'Delaware, United States',            baseConf: 94 },
+  { name: 'Commitment Amount',        value: '$2,500,000',                         baseConf: 87 },
+  { name: 'Authorized Signatory',     value: 'Patricia Holloway, Managing Partner',baseConf: 82 },
+  { name: 'Signatory Email',          value: 'p.holloway@crestwoodlp.com',         baseConf: 97 },
+  { name: 'Date of Incorporation',    value: 'June 4, 2015',                       baseConf: 88 },
+  { name: 'Beneficial Owner >25%',    value: '[FLAGGED – Requires Manual Review]', baseConf: 69 },
+  { name: 'Tax Classification',       value: 'Partnership',                        baseConf: 93 },
+  { name: 'Bank Account (Last 4)',    value: 'XXXX-7203',                          baseConf: 95 },
+  { name: 'ABA Routing Number',       value: '021000021',                          baseConf: 94 },
+  { name: 'FATCA Status',             value: 'Exempt Payee',                       baseConf: 85 },
+  { name: 'Country of Formation',     value: 'United States',                      baseConf: 96 },
 ];
 
-function buildFields(seed) {
+function buildFields() {
   return BASE_FIELDS.map(f => {
-    const c = Math.max(60, Math.min(99, f.baseConf + rand(-8, 6)));
+    const c = Math.max(58, Math.min(99, f.baseConf + rand(-10, 5)));
     return {
       ...f,
       confidence: c,
@@ -152,34 +168,58 @@ function buildFields(seed) {
   });
 }
 
-export const DOCUMENTS = Array.from({ length: 36 }, (_, i) => {
-  const status = i < 4 ? 'Processing'
-    : i < 10 ? 'Failed'
-    : i < 18 ? 'Under Review'
-    : i < 28 ? 'Extracted'
+// Post-go-live simulation:
+// ~87% of requests complete within 36–52 min (trending toward 36 min target)
+// ~6% error rate (trending toward <5% target)
+// Volume: ~136 initial + ~34 additional onboarding requests per day
+export const DOCUMENTS = Array.from({ length: 48 }, (_, i) => {
+  // Status distribution simulating post-go-live ramp:
+  // 60% validated, 20% extracted, 10% under review, 6% processing, 4% failed
+  const status = i < 2  ? 'Failed'
+    : i < 7  ? 'Processing'
+    : i < 17 ? 'Under Review'
+    : i < 27 ? 'Extracted'
     : 'Validated';
 
+  // ~80% Initial Onboarding (32K/40K annual), ~20% Additional (8K/40K)
+  const onboardingType = i % 5 === 0 ? 'Additional Onboarding' : 'Initial Onboarding';
+
+  // Processing time simulation: trending from 90 min baseline toward 36 min target
+  // Earlier docs (higher i) are more recent and show more improvement
+  const baselineMin  = onboardingType === 'Initial Onboarding' ? 90 : 9;
+  const targetMin    = onboardingType === 'Initial Onboarding' ? 36 : 3.6;
+  const improvement  = Math.min(0.58, 0.30 + (i / 48) * 0.28); // 30%→58% reduction ramp
+  const actualMin    = Math.round(baselineMin * (1 - improvement) + rand(-4, 4));
+
   const client = pick(CLIENTS);
-  const total  = rand(18, 32);
-  const extracted = status === 'Processing' ? rand(2, 8)
-    : status === 'Failed' ? rand(4, 10)
-    : rand(Math.floor(total * 0.7), total);
+  const total  = rand(10, 16);
+  const extracted = status === 'Processing' ? rand(2, 6)
+    : status === 'Failed'      ? rand(3, 7)
+    : rand(Math.floor(total * 0.75), total);
+
+  // Error rate: ~6% of fields are wrong (target <5%)
+  const errorFields = status === 'Validated' ? Math.round(total * rand(3, 8) / 100) : 0;
 
   return {
     id:              genId(),
     docType:         pick(DOC_TYPES),
+    onboardingType,
     client,
     fund:            `${client.split(' ')[0]} ${pick(FUNDS)}`,
     status,
-    confidence:      conf(68, 97),
-    receivedAt:      ts(i * 17 + rand(0, 10)),
-    pages:           rand(2, 22),
+    confidence:      conf(72, 97),
+    receivedAt:      ts(i * 14 + rand(0, 8)),
+    pages:           rand(2, 18),
     fieldsExtracted: extracted,
     fieldsTotal:     total,
+    errorFields,
     source:          pick(DOC_SOURCES),
     flagged:         status === 'Under Review' || status === 'Failed',
-    fields:          buildFields(i),
-    ocrEngine:       pick(['Azure Document Intelligence', 'Mistral OCR', 'Docling']),
+    fields:          buildFields(),
+    processingTimeMin: actualMin,
+    baselineTimeMin:   baselineMin,
+    targetTimeMin:     targetMin,
+    ocrEngine:       'Azure Document Intelligence',
   };
 });
 
@@ -277,31 +317,125 @@ export const FEE_CALCS = Array.from({ length: 28 }, (_, i) => {
 // ─── DASHBOARD STATS ─────────────────────────────────────────────────────────
 
 export const DASHBOARD = {
+  // ── UC-10 Email Triage ─────────────────────────────────────────────────────
+  // SOW: 1335933.11 + Schedule 1335948.8
+  // Baseline: 4.4 hrs / 2,500 emails → Target: 1.1 hrs (75% reduction) — Sched 3
+  // 18.6 FTE baseline → 7.4 target (60% FTE reduction) — Sched 2
+  // Transformation value: $1,149,512 · IBM gainshare: $344,853 (30%) — Sched 2
   uc10: {
-    received:      3241,
-    autoRouted:    2949,
-    humanReview:   143,
-    slaAtRisk:     17,
-    slaCompliance: 98,
-    exceptions:    22,
-    avgConfidence: 91,
+    received:               3241,
+    autoRouted:             2948,
+    humanReview:            293,
+    slaAtRisk:              17,
+    slaCompliance:          97,
+    exceptions:             22,
+    avgConfidence:          87,
+    baselineHrsPer2500:     4.4,
+    targetHrsPer2500:       1.1,
+    currentHrsPer2500:      1.85,
+    triageReductionPct:     58,
+    accuracyFloor:          76,
+    accuracyPct:            87,
+    baselineFTEs:           18.6,
+    targetFTEs:             7.4,
+    currentFTEs:            11.5,
+    fteReductionPct:        38,
+    transformationValue:    1149512,
+    gainshareTotal:         344853,
+    gainshareEarned:        104853,
+    annualBaselineSpend:    1916480,
   },
   uc11: {
-    processed:       412,
-    extractionAccuracy: 84,
-    validationQueue: 58,
-    exceptions:      11,
-    slaCompliance:   95,
-    docsToday:       47,
-    avgConfidence:   87,
+    // SOW Schedule 3 — contractual measurement metrics
+    // Baseline: 90 min/Initial, 9 min/Additional — Target: 36 min / 3.6 min (60% reduction)
+    totalRequestsProcessed:   412,
+    initialOnboardingCount:   330,
+    additionalOnboardingCount: 82,
+    avgProcessingTimeMin:     52,
+    baselineTimeMin:          90,
+    targetTimeMin:            36,
+    processingTimeReductionPct: 42,
+    extractionErrorRate:      5.8,
+    errorRateTarget:          5,
+    avgConfidence:            88,
+    transformationValue:      1135500,
+    gainshareTotal:           340650,
+    gainshareEarned:          104920,
+    annualBaselineSpend:      2017500,
+    annualValueCreated:       1210500,
+    validationQueue:          17,
+    exceptions:               9,
+    requestsToday:            47,
+    processed:                412,
   },
+  // ── UC-19 Fee Calculation ──────────────────────────────────────────────────
+  // SOW: IBM-SOW UC-19 with Schedules - Execution Version - 2 July 2026
+  // Baseline: 40 min/calc → Target: 18 min (55% reduction) — Sched 3
+  // 48 FTE baseline → 21.6 target (55% FTE reduction) — Sched 2
+  // Transformation value: $2,499,411 · IBM gainshare: $749,823 (30%) — Sched 2
   uc19: {
-    runs:            89,
-    automationRate:  87,
-    exceptions:      9,
-    reconciliations: 4,
-    slaCompliance:   97,
-    feesProcessed:   '$2.4M',
-    avgAccuracy:     94,
+    calculationsProcessed:  312,
+    processingReductionPct: 36,
+    baselineMinPerCalc:     40,
+    targetMinPerCalc:       18,
+    currentMinPerCalc:      25.6,
+    exceptionRate:          9.6,
+    reconciliationRate:     91,
+    automationRate:         82,
+    fteReductionPct:        24,
+    baselineFTEs:           48,
+    targetFTEs:             21.6,
+    currentFTEs:            36.5,
+    transformationValue:    2499411,
+    gainshareTotal:         749823,
+    gainshareEarned:        225000,
+    annualBaselineSpend:    4617110,
+    runs:                   312,
   },
+};
+
+// ── PORTFOLIO TOTALS (cross-UC, all values from SOW Schedules 2) ──────────────
+export const PORTFOLIO = {
+  combinedTransformationValue: 4784423,
+  combinedGainshareTotal:      1435326,
+  combinedGainshareEarned:     434773,
+  combinedBaselineSpend:       8551090,
+  useCases: [
+    {
+      id:                  'uc10',
+      name:                'UC-10 Email Triage',
+      icon:                '📧',
+      transformationValue: 1149512,
+      gainshareTotal:      344853,
+      gainshareEarned:     104853,
+      reductionTarget:     75,
+      reductionAchieved:   58,
+      goLiveDate:          'Sep 11, 2026',
+      color:               '#4a9eff',
+    },
+    {
+      id:                  'uc11',
+      name:                'UC-11 Document Extraction',
+      icon:                '📄',
+      transformationValue: 1135500,
+      gainshareTotal:      340650,
+      gainshareEarned:     104920,
+      reductionTarget:     60,
+      reductionAchieved:   42,
+      goLiveDate:          'Sep 11, 2026',
+      color:               '#a78bfa',
+    },
+    {
+      id:                  'uc19',
+      name:                'UC-19 Fee Calculation',
+      icon:                '💰',
+      transformationValue: 2499411,
+      gainshareTotal:      749823,
+      gainshareEarned:     225000,
+      reductionTarget:     55,
+      reductionAchieved:   36,
+      goLiveDate:          'Sep 11, 2026',
+      color:               '#f5a623',
+    },
+  ],
 };
